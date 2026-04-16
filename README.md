@@ -67,7 +67,7 @@ OLLAMA_MODEL=qwen2.5
 
 ```bash
 export PYTHONPATH=.
-python -m app.main -q "高空抛物相关侵权责任由谁承担？"
+python -m app.main -q "上海和深圳关于这个高空抛物的规定有什么区别，有典型的司法实践案例吗"
 ```
 
 交互模式：
