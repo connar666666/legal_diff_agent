@@ -1,0 +1,8 @@
+# 若有人在项目内用 python -m venv lawdif，可忽略同名目录（Conda 环境在 conda 的 envs 目录）
+lawdif/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+*.egg-info/

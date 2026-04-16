@@ -1,0 +1,2 @@
+{"law_name": "深圳市物业管理条例", "jurisdiction": "深圳", "url": "https://zjj.sz.gov.cn/attachment/1/1462/1462387/7385197.pdf", "local_path": "/home/fangcong/legal_diff_agent/data/raw/laws/7385197.pdf_413ee0336e533494.html", "note": "深圳高空抛物管理规范文件", "ts": "2026-04-04T14:00:14.615904+00:00"}
+{"law_name": "深圳市城市治理条例", "jurisdiction": "深圳", "url": "https://zjj.sz.gov.cn/attachment/1/1462/1462387/7385197.pdf", "local_path": "/home/fangcong/legal_diff_agent/data/raw/laws/7385197.pdf_413ee0336e533494.html", "note": "深圳高空抛物管理专项文件", "ts": "2026-04-04T14:39:46.243604+00:00"}
