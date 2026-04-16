@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     bm25_weight: float = 0.45
     vector_weight: float = 0.55
 
+    # 多地对比：条文级语义对齐（检索候选池 + 句向量配对）
+    compare_retrieval_top_k: int = 32
+    compare_semantic_min_similarity: float = 0.28
+    compare_max_aligned_pairs: int = 12
+
     # 日志
     log_level: str = "INFO"
 

@@ -56,3 +56,10 @@ class CompareRow(BaseModel):
     content_a: str
     content_b: str
     note: str = ""
+    # 条文级语义对齐（句向量配对）时的可选字段
+    similarity_score: Optional[float] = None
+    chunk_id_a: str = ""
+    chunk_id_b: str = ""
+    article_hint_a: str = ""
+    article_hint_b: str = ""
+    alignment_method: str = ""
