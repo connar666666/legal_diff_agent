@@ -11,6 +11,7 @@ import numpy as np
 from app.config import settings
 from app.retrieval.embedding import encode_texts
 from app.schema.models import CompareRow
+from app.utils.citation import format_law_citation
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,19 @@ def greedy_pair_by_similarity(
     return pairs
 
 
+def _citation_fields(hit: dict[str, Any]) -> tuple[str, str, str]:
+    """(law_title, article_label, citation) 供模型显式引用。"""
+    title = (hit.get("law_title") or "").strip()
+    sub = (hit.get("sub_label") or "").strip()
+    art = (hit.get("article_label") or "").strip()
+    if not art:
+        art = extract_article_hint(hit.get("text") or "")
+    cit = (hit.get("citation") or "").strip()
+    if not cit:
+        cit = format_law_citation(title, art, sub)
+    return title, art, cit
+
+
 def semantic_align_jurisdictions(
     hits_a: list[dict[str, Any]],
     hits_b: list[dict[str, Any]],
@@ -104,28 +118,42 @@ def semantic_align_jurisdictions(
         return []
 
     if not hits_a:
+        hb0 = hits_b[0]
+        lt_b, al_b, c_b = _citation_fields(hb0)
         return [
             CompareRow(
                 aspect=f"仅检索到「{jurisdiction_b}」",
                 jurisdiction_a=jurisdiction_a,
                 jurisdiction_b=jurisdiction_b,
                 content_a="（未检索到该法域下与主题相关的法规片段）",
-                content_b=(hits_b[0].get("text") or "")[:2000],
+                content_b=(hb0.get("text") or "")[:2000],
                 note="请为法域 A 补充法规数据或调整关键词后重建索引。",
                 alignment_method="single_side",
+                law_title_b=lt_b,
+                article_label_b=al_b,
+                citation_b=c_b,
+                chunk_id_b=str(hb0.get("id", "")),
+                article_hint_b=extract_article_hint(hb0.get("text") or ""),
             )
         ]
 
     if not hits_b:
+        ha0 = hits_a[0]
+        lt_a, al_a, c_a = _citation_fields(ha0)
         return [
             CompareRow(
                 aspect=f"仅检索到「{jurisdiction_a}」",
                 jurisdiction_a=jurisdiction_a,
                 jurisdiction_b=jurisdiction_b,
-                content_a=(hits_a[0].get("text") or "")[:2000],
+                content_a=(ha0.get("text") or "")[:2000],
                 content_b="（未检索到该法域下与主题相关的法规片段）",
                 note="请为法域 B 补充法规数据或调整关键词后重建索引。",
                 alignment_method="single_side",
+                law_title_a=lt_a,
+                article_label_a=al_a,
+                citation_a=c_a,
+                chunk_id_a=str(ha0.get("id", "")),
+                article_hint_a=extract_article_hint(ha0.get("text") or ""),
             )
         ]
 
@@ -149,8 +177,10 @@ def semantic_align_jurisdictions(
         raw_b = (hb.get("text") or "")[:2000]
         hint_a = extract_article_hint(raw_a)
         hint_b = extract_article_hint(raw_b)
-        label_a = hint_a or f"片段 {ia + 1}"
-        label_b = hint_b or f"片段 {ib + 1}"
+        lt_a, al_a, c_a = _citation_fields(ha)
+        lt_b, al_b, c_b = _citation_fields(hb)
+        label_a = al_a or hint_a or f"片段 {ia + 1}"
+        label_b = al_b or hint_b or f"片段 {ib + 1}"
         aspect = f"语义对齐 #{rank}：{label_a} ↔ {label_b}（相似度 {score:.2f}）"
 
         rows.append(
@@ -160,13 +190,19 @@ def semantic_align_jurisdictions(
                 jurisdiction_b=jurisdiction_b,
                 content_a=raw_a,
                 content_b=raw_b,
-                note="基于句向量余弦相似度的跨法域片段配对；条号取自正文前缀，若无法识别则显示「片段」编号。",
+                note="基于句向量余弦相似度的跨法域片段配对；citation_* 与 law_title_* / article_label_* 来自索引元数据，请据此作答引用。",
                 similarity_score=round(score, 4),
                 chunk_id_a=str(ha.get("id", "")),
                 chunk_id_b=str(hb.get("id", "")),
                 article_hint_a=hint_a,
                 article_hint_b=hint_b,
                 alignment_method="semantic_embedding_greedy",
+                law_title_a=lt_a,
+                law_title_b=lt_b,
+                article_label_a=al_a,
+                article_label_b=al_b,
+                citation_a=c_a,
+                citation_b=c_b,
             )
         )
 
@@ -187,8 +223,12 @@ def _fallback_index_pairs(
     n = min(len(hits_a), len(hits_b), settings.compare_max_aligned_pairs)
     rows: list[CompareRow] = []
     for i in range(n):
-        ta = (hits_a[i].get("text") or "")[:2000]
-        tb = (hits_b[i].get("text") or "")[:2000]
+        ha_i = hits_a[i]
+        hb_i = hits_b[i]
+        ta = (ha_i.get("text") or "")[:2000]
+        tb = (hb_i.get("text") or "")[:2000]
+        lt_a, al_a, c_a = _citation_fields(ha_i)
+        lt_b, al_b, c_b = _citation_fields(hb_i)
         rows.append(
             CompareRow(
                 aspect=f"检索排名对齐 #{i + 1}（语义配对未达阈值，主题：{topic[:40]}）",
@@ -196,8 +236,18 @@ def _fallback_index_pairs(
                 jurisdiction_b=jurisdiction_b,
                 content_a=ta,
                 content_b=tb,
-                note="未找到足够高相似度的跨法域配对，已按检索排名并列展示。",
+                note="未找到足够高相似度的跨法域配对，已按检索排名并列展示；引用请优先使用 citation_* 字段。",
                 alignment_method="retrieval_rank_fallback",
+                chunk_id_a=str(ha_i.get("id", "")),
+                chunk_id_b=str(hb_i.get("id", "")),
+                article_hint_a=extract_article_hint(ta),
+                article_hint_b=extract_article_hint(tb),
+                law_title_a=lt_a,
+                law_title_b=lt_b,
+                article_label_a=al_a,
+                article_label_b=al_b,
+                citation_a=c_a,
+                citation_b=c_b,
             )
         )
     return rows

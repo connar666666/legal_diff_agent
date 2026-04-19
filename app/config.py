@@ -80,6 +80,14 @@ class Settings(BaseSettings):
     bm25_weight: float = 0.45
     vector_weight: float = 0.55
 
+    # 混合检索之后的 Cross-Encoder 精排（在融合候选上重算相关性）
+    rerank_enabled: bool = False
+    rerank_model_name: str = "BAAI/bge-reranker-base"
+    rerank_pool_k: int = 40
+    rerank_batch_size: int = 16
+    rerank_max_length: int = 512
+    rerank_max_passage_chars: int = 4000
+
     # 多地对比：条文级语义对齐（检索候选池 + 句向量配对）
     compare_retrieval_top_k: int = 32
     compare_semantic_min_similarity: float = 0.28

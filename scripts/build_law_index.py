@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""从 processed 法规 JSONL 或纯文本构建 law_bm25 + law_faiss + law_texts.json。"""
+"""从 processed 法规 JSONL 或纯文本构建 law_bm25 + law_faiss + law_texts.json + law_chunk_meta.json。"""
 
 from __future__ import annotations
 
@@ -104,6 +104,7 @@ def main() -> None:
 
     args.index_dir.mkdir(parents=True, exist_ok=True)
     pairs: list[tuple[str, str]] = []
+    chunk_meta: dict[str, dict[str, str]] = {}
 
     for path in input_paths:
         meta, text = parse_file(path)
@@ -111,10 +112,23 @@ def main() -> None:
         chunks = chunk_law_text(meta, text, doc_id)
         for c in chunks:
             pairs.append((c.id, c.text))
+            sub = (c.extra or {}).get("sub_label") or ""
+            chunk_meta[c.id] = {
+                "law_title": (c.meta.title or "").strip(),
+                "doc_id": c.doc_id,
+                "article_label": (c.article_label or "").strip(),
+                "sub_label": str(sub).strip(),
+                "jurisdiction": (c.meta.jurisdiction or "").strip(),
+                "source_type": (c.meta.source_type or "").strip(),
+                "source_url": (c.meta.source_url or "").strip(),
+            }
 
     id_to_text = {i: t for i, t in pairs}
     (args.index_dir / "law_texts.json").write_text(
         json.dumps(id_to_text, ensure_ascii=False), encoding="utf-8"
+    )
+    (args.index_dir / "law_chunk_meta.json").write_text(
+        json.dumps(chunk_meta, ensure_ascii=False), encoding="utf-8"
     )
 
     bm25 = BM25LawIndex()

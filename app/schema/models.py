@@ -63,3 +63,10 @@ class CompareRow(BaseModel):
     article_hint_a: str = ""
     article_hint_b: str = ""
     alignment_method: str = ""
+    # 显式引用（来自索引 law_chunk_meta；便于模型按法规名+条号作答）
+    law_title_a: str = ""
+    law_title_b: str = ""
+    article_label_a: str = ""
+    article_label_b: str = ""
+    citation_a: str = ""
+    citation_b: str = ""

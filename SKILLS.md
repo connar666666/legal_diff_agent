@@ -51,6 +51,7 @@
 1. **先工具、后长答**：有索引时 **先** `search_law_tool` / `search_case_tool` / `compare_tool`，再组织回答。  
 2. **失败看 JSON**：工具返回 `ok: false` 时读 `missing` / `next_steps`，按提示补数据或建索引，**不要**空口编条文。  
 3. **对比不走两次 search**：跨地法规异同 **优先一次** `compare_tool`，不要两边各搜一次再自己拼（除非 `compare_tool` 不可用）。
+4. **条文级引用**：`search_law_tool` 命中与 `compare_tool` 的 `rows[]` 中含 **`citation`**、**`law_title`**、**`article_label`**（及对比侧的 **`citation_a` / `citation_b`**）时，向用户作答须**显式写出**这些引用，与工具 JSON 一致；重建索引后才会生成完整 `citation`（见 `law_chunk_meta.json`）。
 
 ## 配置（关闭或换路径）
 
