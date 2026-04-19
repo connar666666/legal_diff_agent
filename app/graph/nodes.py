@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
-from app.graph.prompts import SYSTEM_PROMPT
+from app.graph.prompts import get_agent_system_prompt
 
 
 def get_llm_runnable():
@@ -33,7 +33,7 @@ def prepend_system(messages: list[BaseMessage]) -> list[BaseMessage]:
     """在消息列表前插入系统消息（自定义 StateGraph 时使用）。"""
     if messages and isinstance(messages[0], SystemMessage):
         return messages
-    return [SystemMessage(content=SYSTEM_PROMPT)] + list(messages)
+    return [SystemMessage(content=get_agent_system_prompt())] + list(messages)
 
 
 def last_user_text(messages: list[BaseMessage]) -> str:

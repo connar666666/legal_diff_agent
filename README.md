@@ -1,6 +1,6 @@
 # legal_diff_agent
 
-法规检索、案例检索与多地对比的 LangGraph 智能体工程。数据流水线将公开法律文本解析、按「条/款」切分；检索层采用 **BM25 + 向量（FAISS）** 混合融合；**两地对比**在检索候选上使用 **句向量余弦相似度 + 贪心配对**，实现条文片段级语义对齐（非人工逐条标注）。LLM 默认通过 **本地 Transformers（GPU）** 直接加载模型（也可切换到 Ollama）。
+法规检索、案例检索与多地对比的 LangGraph 智能体工程。**Agent 行为约定（官网优先入库等）**：见根目录 [`SKILLS.md`](SKILLS.md)。启动 CLI 时默认 **自动读入并拼接到系统提示**（`agent_skills_enabled`，见 `app/config.py`）；基础指令在 `app/graph/prompts.py`。数据流水线将公开法律文本解析、按「条/款」切分；检索层采用 **BM25 + 向量（FAISS）** 混合融合；**两地对比**在检索候选上使用 **句向量余弦相似度 + 贪心配对**，实现条文片段级语义对齐（非人工逐条标注）。LLM 默认通过 **本地 Transformers（GPU）** 直接加载模型（也可切换到 Ollama）。
 
 ## 环境（Conda 环境 `lawdif`）
 

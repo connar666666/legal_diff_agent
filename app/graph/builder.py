@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from app.graph.prompts import SYSTEM_PROMPT
+from app.config import settings
+from app.graph.prompts import get_agent_system_prompt
 from app.llm.model_factory import get_chat_model_for_agent
 from app.tools import registry as tool_registry
 from app.tools.export_tool import all_tools
@@ -22,7 +23,7 @@ def build_agent_graph(debug: bool = False):
     graph = create_react_agent(
         model,
         tools,
-        prompt=SYSTEM_PROMPT,
+        prompt=get_agent_system_prompt(),
         debug=debug,
     )
     return graph

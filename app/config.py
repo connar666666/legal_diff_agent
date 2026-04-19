@@ -22,6 +22,10 @@ class Settings(BaseSettings):
 
     project_root: Path = Field(default_factory=_project_root)
 
+    # 启动时拼入系统提示：项目根目录 SKILLS.md（可改路径或关闭）
+    agent_skills_enabled: bool = True
+    agent_skills_path: Path = Field(default_factory=lambda: _project_root() / "SKILLS.md")
+
     # LLM 后端选择：`ollama` 使用 HTTP；`transformers` 直接加载本地模型到 GPU
     llm_backend: str = "transformers"
 
