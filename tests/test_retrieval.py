@@ -2,6 +2,8 @@
 
 from app.retrieval.bm25_index import BM25LawIndex, tokenize_zh_en
 from app.retrieval.hybrid_retriever import fuse_weighted
+from app.retrieval.rerank import maybe_rerank
+from app.config import settings
 
 
 def test_tokenize():
@@ -21,3 +23,13 @@ def test_bm25_and_fuse():
 
     fused = fuse_weighted([("a", 1.0)], [("b", 0.5)], 0.5, 0.5)
     assert fused
+
+
+def test_rerank_disabled_passthrough():
+    prev = settings.rerank_enabled
+    settings.rerank_enabled = False
+    try:
+        hits = [("a", 0.9, "foo"), ("b", 0.1, "bar")]
+        assert maybe_rerank("q", hits) == hits
+    finally:
+        settings.rerank_enabled = prev

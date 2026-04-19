@@ -18,6 +18,7 @@ def compare_tool(topic: str, jurisdiction_a: str, jurisdiction_b: str) -> str:
 
     对齐方式：在两地各自检索到的候选片段上，使用与建索引相同的句向量模型计算
     余弦相似度，并按阈值做贪心最优配对（条文片段级语义对齐）；无法配对时回退为检索排名并列。
+    返回 `rows[]` 中含 **`citation_a` / `citation_b`**、**`law_title_*`**、**`article_label_*`**，作答时须据此显式引用。
 
     topic: 主题，如「高空抛物」「物业管理」。
     jurisdiction_a / jurisdiction_b: 两个法域名称或简称。

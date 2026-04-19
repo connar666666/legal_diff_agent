@@ -8,6 +8,7 @@ from typing import Iterable, Optional
 from app.config import settings
 from app.retrieval.bm25_index import BM25LawIndex
 from app.retrieval.embedding import encode_query
+from app.retrieval.rerank import maybe_rerank
 from app.retrieval.vector_store import FaissVectorStore
 
 logger = logging.getLogger(__name__)
@@ -76,17 +77,23 @@ class HybridRetriever:
         bm_hits = self.bm25.search(q, top_k=self.bm25_top_k)
         qv = encode_query(q)
         vec_hits = self.vectors.search(qv, top_k=self.vector_top_k)
+        pre_k = (
+            max(settings.rerank_pool_k, self.fusion_top_k)
+            if settings.rerank_enabled
+            else self.fusion_top_k
+        )
         fused = fuse_weighted(
             bm_hits,
             vec_hits,
             self.bm25_weight,
             self.vector_weight,
-        )[: self.fusion_top_k]
+        )[:pre_k]
         out: list[tuple[str, float, str]] = []
         for doc_id, score in fused:
             text = self.id_to_text.get(doc_id, "")
             out.append((doc_id, score, text))
-        return out
+        out = maybe_rerank(q, out)
+        return out[: self.fusion_top_k]
 
 
 def build_hybrid_from_pairs(

@@ -15,7 +15,7 @@ def search_law_tool(query: str, jurisdiction: str = "") -> str:
     根据用户问题检索相关法规条文片段。
     query: 自然语言问题或关键词（可含条号、法律术语）。
     jurisdiction: 可选法域过滤，如「北京」「全国」；未知则留空。
-    返回带条号/得分的片段摘要（JSON 字符串）。
+    返回 JSON：`hits[]` 中含 `id`、`score`、`text`，以及 **`law_title`、`article_label`、`sub_label`、`citation`**（重建索引后由 `law_chunk_meta.json` 提供；无元数据时 `citation` 可能仅含从正文推断的条号）。
     """
     svc = registry.get_law_service()
     if not svc or not svc.retriever:
