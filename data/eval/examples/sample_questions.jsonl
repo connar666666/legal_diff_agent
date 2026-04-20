@@ -1,0 +1,3 @@
+{"id": "ex-001", "question": "高空抛物造成损害，一般适用什么侵权责任规则？", "task_type": "retrieve", "gold_citations": ["《中华人民共和国民法典》第一千二百五十四条", "第一千二百五十四条"], "gold_keywords": ["高空", "抛物", "民法典"]}
+{"id": "ex-002", "question": "物业管理区域内业主共有部分收益归谁？", "task_type": "retrieve", "gold_citations": [], "gold_keywords": ["物业", "共有", "收益"]}
+{"id": "ex-003", "question": "深圳和上海对于住宅小区外墙脱落致人损害，相关地方性规定可能有何差异？", "task_type": "compare", "gold_citations": [], "gold_keywords": ["深圳", "上海", "脱落", "损害"]}
